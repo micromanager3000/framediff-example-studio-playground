@@ -81,11 +81,12 @@ const playgroundWorld = defineThreeScene({
 
 export const worldSetComp = defineThreeSceneComposition({
   scene: playgroundWorld,
+  kind: "set",
   id: "WorldSet",
   width: 1920,
   height: 1080,
   fps: 30,
-  durationInFrames: 240,
+  durationInFrames: 1,
   dataFile: "src/compositions/playground/WorldSet.scene.json",
   data: worldSetData,
   meta: {
@@ -99,6 +100,7 @@ export const worldSetComp = defineThreeSceneComposition({
 
 export const worldLabComp = defineThreeSceneComposition({
   scene: worldSetComp,
+  kind: "previz",
   id: "WorldLab",
   width: 1920,
   height: 1080,
