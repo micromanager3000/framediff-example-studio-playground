@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "items": [
     {
       "id": "playground-map",
@@ -9,6 +9,15 @@
       "content": {
         "type": "nested",
         "composition": "CoverageMap"
+      },
+      "layout": {
+        "rect": [
+          0,
+          0,
+          1920,
+          1080
+        ],
+        "fit": "cover"
       }
     },
     {
@@ -19,6 +28,15 @@
       "content": {
         "type": "nested",
         "composition": "AuthoringChapter"
+      },
+      "layout": {
+        "rect": [
+          0,
+          0,
+          1920,
+          1080
+        ],
+        "fit": "cover"
       }
     },
     {
@@ -29,6 +47,15 @@
       "content": {
         "type": "nested",
         "composition": "EditorialChapter"
+      },
+      "layout": {
+        "rect": [
+          0,
+          0,
+          1920,
+          1080
+        ],
+        "fit": "cover"
       }
     },
     {
@@ -39,6 +66,15 @@
       "content": {
         "type": "nested",
         "composition": "EffectsChapter"
+      },
+      "layout": {
+        "rect": [
+          0,
+          0,
+          1920,
+          1080
+        ],
+        "fit": "cover"
       }
     },
     {
@@ -49,6 +85,15 @@
       "content": {
         "type": "nested",
         "composition": "PipelineChapter"
+      },
+      "layout": {
+        "rect": [
+          0,
+          0,
+          1920,
+          1080
+        ],
+        "fit": "cover"
       }
     },
     {
@@ -71,6 +116,15 @@
       "content": {
         "type": "layers",
         "label": "Project navigation HUD"
+      },
+      "layout": {
+        "rect": [
+          0,
+          0,
+          1920,
+          1080
+        ],
+        "fit": "cover"
       }
     }
   ]
