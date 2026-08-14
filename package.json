@@ -13,7 +13,7 @@
     "check:authoring": "node vendor/framediff/scripts/check-example-authoring.mjs .",
     "check:bundle": "node vendor/framediff/scripts/check-bundle-budgets.mjs .",
     "typecheck": "npm run check",
-    "test": "vitest run",
+    "test": "vitest run src/data/heroEdl.test.ts src/compositions/playground/StudioPlaygroundGuide.test.ts src/compositions/labs/ProductionLabGuide.test.ts src/compositions/labs/EditableTextCoverage.test.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {
