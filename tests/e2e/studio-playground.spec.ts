@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import type { AgentProjectSnapshot } from "@framediff/studio-model";
 import { readFile, writeFile } from "node:fs/promises";
 import { openComposition } from "./helpers";
 
@@ -561,7 +562,10 @@ test("the agent surface can inspect every new composition kind", async ({ page }
   await openPlayground(page);
 
   const result = await page.evaluate(async () => {
-    const snapshot = await window.__framediffAgent!.inspect();
+    const snapshot = (await window.__framediffStudio!.query({
+      id: "playground-inspect",
+      query: { type: "project.snapshot" },
+    })).result as AgentProjectSnapshot;
     const requested = ["studio-playground", "rich-properties-lab", "coverage-map", "cloth-lab", "world-set", "world-lab", "audio-lab", "skyTimelapse"];
     return requested.map((key) => {
       const entry = snapshot.compositions.find((candidate) => candidate.composition.key === key);
@@ -581,7 +585,7 @@ test("the agent surface can inspect every new composition kind", async ({ page }
   ]);
 
   const visual = await page.evaluate(async () => {
-    const frame = await window.__framediffAgent!.snapshot("studio-playground", 0);
+    const frame = await window.__framediffStudio!.snapshot("studio-playground", 0);
     const image = new Image();
     await new Promise<void>((resolve, reject) => {
       image.onload = () => resolve();

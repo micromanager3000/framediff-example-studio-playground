@@ -7,6 +7,7 @@ function attributeValue(value: string): string {
 export async function openComposition(page: Page, compositionKey: string, url = "/"): Promise<void> {
   await page.goto(url);
   await expect(page.locator(".top-status")).toHaveText("ready");
+  await expect.poll(() => page.evaluate(() => typeof window.__framediffStudio?.query === "function")).toBe(true);
   const selector = `.composition-row[data-composition-key="${attributeValue(compositionKey)}"]`;
   const rows = page.locator(selector);
   expect(await rows.count()).toBeGreaterThan(0);
