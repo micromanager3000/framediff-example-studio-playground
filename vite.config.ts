@@ -11,7 +11,10 @@ import { framediffDev } from "./vendor/framediff/packages/framediff/vite-plugin.
 // through package exports instead of being prefix-rewritten under src/index.ts.
 export default defineConfig({
   plugins: [sveltekit(), framediffDev()],
-  server: { watch: { ignored: ["**/.svelte-kit/**", "**/build/**"] } },
+  server: {
+    fs: { allow: [fileURLToPath(new URL(".", import.meta.url))] },
+    watch: { ignored: ["**/.svelte-kit/**", "**/build/**"] },
+  },
   resolve: {
     dedupe: ["svelte"],
     alias: [
