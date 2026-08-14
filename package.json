@@ -10,6 +10,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:authoring": "node vendor/framediff/scripts/check-example-authoring.mjs .",
+    "check:bundle": "node vendor/framediff/scripts/check-bundle-budgets.mjs .",
     "typecheck": "npm run check",
     "test": "vitest run",
     "test:e2e": "playwright test"
