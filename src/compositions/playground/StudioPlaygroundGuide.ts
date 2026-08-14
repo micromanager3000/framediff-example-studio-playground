@@ -135,11 +135,11 @@ export const studioPlaygroundGuide: StudioGuideDescriptor = {
     {
       id: "source",
       phase: "Author",
-      title: "Relate authored onFrame code to preview",
+      title: "Inspect authored onFrame behavior",
       description: "Typed controls and registered motion coexist with a first-class arbitrary onFrame escape hatch.",
-      try: "Open Code for LowerThird and scrub its entrance and exit while reading the literal source.",
-      success: "The source is understandable and random-access evaluation needs no playback history.",
-      target: { compositionKey: "lower-third", frame: 12, selection: { kind: "element", objectId: "lower-third-copy" }, panel: "code" },
+      try: "Inspect the LowerThird copy and scrub its entrance and exit in the preview.",
+      success: "Random-access evaluation needs no playback history.",
+      target: { compositionKey: "lower-third", frame: 12, selection: { kind: "element", objectId: "lower-third-copy" }, panel: "inspector" },
     },
     {
       id: "cache",

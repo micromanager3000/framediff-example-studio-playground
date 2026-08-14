@@ -67,10 +67,10 @@ test("compact desktop windows keep every major panel reachable without horizonta
   expect(layout.topbarWidth).toBeLessThanOrEqual(layout.viewport);
   await expect(page.locator(".right-panel")).toBeHidden();
 
-  await page.getByRole("button", { name: "Open side panel" }).click();
+  await page.getByRole("button", { name: "Open Inspector panel" }).click();
   await expect(page.locator(".right-panel")).toBeVisible();
   await expect(page.getByRole("button", { name: "INSPECT", exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "CODE", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "CODE", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "GUIDE", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Close side panel" }).click();
   await expect(page.locator(".right-panel")).toBeHidden();
@@ -143,10 +143,10 @@ test("mobile uses a canvas-first shell with reachable drawers and project action
   await page.getByRole("button", { name: "Close compositions panel" }).click();
   await expect(page.locator(".left-panel")).toBeHidden();
 
-  await page.getByRole("button", { name: "Open side panel" }).click();
+  await page.getByRole("button", { name: "Open Inspector panel" }).click();
   await expect(page.locator(".right-panel")).toBeVisible();
   await expect(page.getByRole("button", { name: "INSPECT", exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "CODE", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "CODE", exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Close side panel" }).click();
 
   await page.getByRole("button", { name: "Open project actions" }).click();

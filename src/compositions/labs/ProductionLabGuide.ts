@@ -135,11 +135,11 @@ export const productionLabGuide: StudioGuideDescriptor = {
     {
       id: "source",
       phase: "Source",
-      title: "Follow an authored onFrame composition",
+      title: "Inspect an authored onFrame composition",
       description: "Arbitrary onFrame code remains a first-class escape hatch beside typed controls and registered motion.",
-      try: "Open Code for LowerThird, scrub its entrance/exit and relate the literal source to the preview.",
+      try: "Inspect the LowerThird copy and scrub its entrance and exit in the preview.",
       success: "Random-access scrubbing evaluates the correct state without converting the composition to GSAP.",
-      target: { compositionKey: "lower-third", frame: 12, selection: { kind: "element", objectId: "lower-third-copy" }, panel: "code" },
+      target: { compositionKey: "lower-third", frame: 12, selection: { kind: "element", objectId: "lower-third-copy" }, panel: "inspector" },
     },
     {
       id: "artifacts",
