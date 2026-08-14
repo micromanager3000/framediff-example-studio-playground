@@ -10,12 +10,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "typecheck": "npm run check"
+    "typecheck": "npm run check",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@framediff/studio-model": "*",
-    "@framediff/studio-ui": "*",
-    "framediff": "*",
+    "@framediff/studio-model": "file:vendor/framediff/packages/studio-model",
+    "@framediff/studio-ui": "file:vendor/framediff/packages/studio-ui",
+    "framediff": "file:vendor/framediff/packages/framediff",
     "three": "^0.185.1"
   },
   "devDependencies": {
@@ -26,6 +27,7 @@
     "svelte": "^5.56.9",
     "svelte-check": "^4.7.5",
     "typescript": "^6.0.3",
-    "vite": "^8.2.1"
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
   }
 }

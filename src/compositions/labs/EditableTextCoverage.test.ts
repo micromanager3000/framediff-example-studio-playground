@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { flattenHtmlElements, parseHtmlSource } from "../../../../../packages/framediff/src/studio/htmlSource";
+import { flattenHtmlElements, parseHtmlSource } from "../../../vendor/framediff/packages/framediff/src/studio/htmlSource";
 import directSource from "./DirectManipulationLab.html?raw";
 import editorialSource from "./EditorialLab.html?raw";
 import motionSource from "./GsapMotionLab.html?raw";

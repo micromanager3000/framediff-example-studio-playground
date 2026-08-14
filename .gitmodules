@@ -1,0 +1,3 @@
+[submodule "vendor/framediff"]
+	path = vendor/framediff
+	url = https://github.com/micromanager3000/framediff.git
