@@ -4,3 +4,6 @@ build/
 .vite/
 *.log
 .DS_Store
+
+# Studio-local state including provider secrets (.framediff/secrets.json)
+.framediff/
