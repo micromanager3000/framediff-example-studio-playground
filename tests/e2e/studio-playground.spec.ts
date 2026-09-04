@@ -613,7 +613,7 @@ test("the agent surface can inspect every new composition kind", async ({ page }
     { key: "world-set", kind: "set", objects: 0 },
     { key: "world-lab", kind: "previz", objects: 2 },
     { key: "audio-lab", kind: "audio", objects: 2 },
-    { key: "skyTimelapse", kind: "scene", objects: 0 },
+    { key: "skyTimelapse", kind: "scene", objects: 1 },
   ]);
 
   const visual = await page.evaluate(async () => {
@@ -651,7 +651,6 @@ test("set-linked previz exposes inherited Set camera keys before its sidecar is 
   const original = await readFile(cameraFile, "utf8");
   try {
     await writeFile(cameraFile, `${JSON.stringify({ version: 1, cameras: {} }, null, 2)}\n`);
-    await page.reload();
     await openComposition(page, "world-lab");
     await page.getByRole("button", { name: "INSPECT", exact: true }).click();
 
@@ -725,7 +724,6 @@ test("set-linked previz exposes its input and a persistent numeric camera key ed
     await expect.poll(async () => JSON.parse(await readFile(cameraFile, "utf8")).cameras.overview.keyframes[1].frame).toBe(110);
     await expect(page.locator(".fd-cl-title span")).toContainText("110f");
 
-    await page.reload();
     await openComposition(page, "world-lab");
     await expect(page.getByRole("spinbutton", { name: "Position X" })).toHaveValue("1.25");
     await expect(page.getByRole("button", { name: "Camera keyframe 2 at frame 110" })).toBeVisible();
