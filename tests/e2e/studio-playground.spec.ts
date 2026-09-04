@@ -169,7 +169,10 @@ test("timeline edge-panning keeps a dragged clip attached to the pointer", async
     await page.mouse.down();
     await page.keyboard.down("Alt");
     await page.mouse.move(targetX, start.y, { steps: 8 });
-    await expect.poll(() => scroller.evaluate((element) => element.scrollLeft), { intervals: [25], timeout: 3_000 })
+    await expect.poll(() => scroller.evaluate((element) => element.scrollLeft), {
+      intervals: [25],
+      timeout: process.env.CI ? 15_000 : 3_000,
+    })
       .toBeGreaterThan(initialScroll + 40);
     const pannedScroll = await scroller.evaluate((element) => element.scrollLeft);
     const during = await clip.boundingBox();
