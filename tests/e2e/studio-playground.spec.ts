@@ -661,7 +661,8 @@ test("set-linked previz exposes inherited Set camera keys before its sidecar is 
     await page.getByRole("spinbutton", { name: "Position X" }).fill("1.5");
     await page.getByRole("button", { name: "Replace the camera keyframe at frame 0" }).click();
     await expect.poll(async () => {
-      const keys = JSON.parse(await readFile(cameraFile, "utf8")).cameras.overview.keyframes;
+      const keys = JSON.parse(await readFile(cameraFile, "utf8")).cameras?.overview?.keyframes;
+      if (!Array.isArray(keys)) return null;
       return { frames: keys.map((key: { frame: number }) => key.frame), x: keys[0].pose.cameraPosition[0] };
     }).toEqual({ frames: [0, 119], x: 1.5 });
   } finally {
