@@ -201,14 +201,17 @@ test("the add-composition flow exposes every maintained starter directly and res
 });
 
 test("the agent check reports warning state clearly and can capture the exact frame", async ({ page }) => {
+  test.setTimeout(process.env.CI ? 600_000 : 120_000);
   await openComposition(page, "studio-playground");
   await expect(page.locator(".topbar").getByRole("button", { name: /Agent API/i })).toHaveCount(0);
   await page.locator(".guide-step-summary").filter({ hasText: "Check and capture through the Agent API" }).click();
   await page.getByRole("button", { name: "RESET TARGET" }).click();
   await page.getByRole("button", { name: "CHECK", exact: true }).click();
-  await expect(page.locator(".agent-check-summary strong")).toHaveText("READY WITH WARNINGS");
+  await expect(page.locator(".agent-check-summary strong")).toHaveText("READY WITH WARNINGS", {
+    timeout: process.env.CI ? 180_000 : 30_000,
+  });
   await expect(page.locator(".agent-check-summary span")).toContainText("warning");
   await page.getByRole("button", { name: "SNAPSHOT CURRENT FRAME" }).click();
-  await expect(page.locator(".agent-frame-result img")).toBeVisible({ timeout: 45_000 });
+  await expect(page.locator(".agent-frame-result img")).toBeVisible({ timeout: process.env.CI ? 180_000 : 45_000 });
   await expect(page.locator(".agent-frame-result figcaption")).toContainText("studio-playground · 90f");
 });
