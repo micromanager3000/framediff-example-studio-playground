@@ -14,9 +14,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
-          ssh-key: ${{ secrets.FRAMEDIFF_DEPLOY_KEY }}
           lfs: true
+      - id: framediff-revision
+        run: echo "sha=$(git rev-parse HEAD:vendor/framediff)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: micromanager3000/framediff
+          ref: ${{ steps.framediff-revision.outputs.sha }}
+          path: vendor/framediff
+          ssh-key: ${{ secrets.FRAMEDIFF_DEPLOY_KEY }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
