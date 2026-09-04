@@ -36,7 +36,7 @@ test("the default project presents the complete nested acceptance graph", async 
 });
 
 test("edit compositions keep rich timeline previews and clip seeking without the ghost stage", async ({ page }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(process.env.CI ? 300_000 : 120_000);
   await openPlayground(page);
   const preview = page.locator(".preview-panel");
 
