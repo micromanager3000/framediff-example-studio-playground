@@ -51,3 +51,10 @@ npm run build
 npx vitest run src/compositions/playground/StudioPlaygroundGuide.test.ts
 npx playwright test tests/e2e/studio-playground.spec.ts --project=chromium
 ```
+
+The browser suite owns its development server and will fail clearly instead of reusing an
+unidentified process on port 4174. When that port is occupied, select a free one explicitly:
+
+```sh
+PLAYWRIGHT_PORT=4189 npm run test:e2e
+```
