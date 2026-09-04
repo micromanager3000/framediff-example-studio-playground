@@ -15,6 +15,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+          ssh-key: ${{ secrets.FRAMEDIFF_DEPLOY_KEY }}
           lfs: true
       - uses: actions/setup-node@v4
         with:

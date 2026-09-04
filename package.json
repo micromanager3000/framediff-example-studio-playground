@@ -21,7 +21,7 @@
     "@framediff/studio-model": "file:vendor/framediff/packages/studio-model",
     "@framediff/studio-ui": "file:vendor/framediff/packages/studio-ui",
     "framediff": "file:vendor/framediff/packages/framediff",
-    "gsap": "^3.15.0",
+    "gsap": "3.13.0",
     "three": "^0.185.1"
   },
   "devDependencies": {
