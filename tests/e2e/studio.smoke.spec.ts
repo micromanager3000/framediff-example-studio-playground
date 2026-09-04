@@ -5,7 +5,7 @@ async function openProductionLab(page: Page): Promise<void> {
   await openComposition(page, "production-lab");
   await expect(page).toHaveTitle("FrameDiff — Studio Playground");
   await expect(page.getByRole("heading", { name: "One project. Every surface." })).toBeVisible();
-  await expect(page.locator(".top-status")).toHaveText("ready");
+  await expect(page.locator(".top-status")).toHaveText("");
 }
 
 test("a new user can discover compositions, media, and cached artifacts", async ({ page }) => {
@@ -49,7 +49,8 @@ test("the guide lands on a stable object and preserves it across refresh", async
 
   await expect(page).not.toHaveURL(/[?&]comp=/);
   await page.reload();
-  await expect(page.locator(".top-status")).toHaveText("ready");
+  await expect(page.locator(".top-status")).toHaveText("");
+  await page.getByRole("button", { name: "INSPECT", exact: true }).click();
   await expect(page.locator(".inspector > header strong")).toHaveText("move-card");
   await expect(page.getByRole("spinbutton", { name: /^x number$/i })).toHaveValue("161");
 });
@@ -67,7 +68,7 @@ test("compact desktop windows keep every major panel reachable without horizonta
   expect(layout.topbarWidth).toBeLessThanOrEqual(layout.viewport);
   await expect(page.locator(".right-panel")).toBeHidden();
 
-  await page.getByRole("button", { name: "Open Inspector panel" }).click();
+  await page.getByRole("button", { name: "Open Agent panel" }).click();
   await expect(page.locator(".right-panel")).toBeVisible();
   await expect(page.getByRole("button", { name: "INSPECT", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "CODE", exact: true })).toHaveCount(0);
@@ -143,7 +144,7 @@ test("mobile uses a canvas-first shell with reachable drawers and project action
   await page.getByRole("button", { name: "Close compositions panel" }).click();
   await expect(page.locator(".left-panel")).toBeHidden();
 
-  await page.getByRole("button", { name: "Open Inspector panel" }).click();
+  await page.getByRole("button", { name: "Open Agent panel" }).click();
   await expect(page.locator(".right-panel")).toBeVisible();
   await expect(page.getByRole("button", { name: "INSPECT", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "CODE", exact: true })).toHaveCount(0);
@@ -178,7 +179,7 @@ test("the add-composition flow exposes every maintained starter directly and res
   await expect(dialog).toBeVisible();
   await expect(page.getByRole("textbox", { name: "Name" })).toBeFocused();
   for (const name of [
-    /Edit Arrange video/, /Clip Select transcript/, /Scene Visual shot/, /Code Scene Source-owned/,
+    /Edit Arrange video/, /Clip Select transcript/, /Scene Visual shot/,
     /Audio Arrange imported/, /3D Scene Three\.js/, /Set Untimed reusable/, /Previz Timed cameras/,
     /Generated Video Prompt/, /Generated Image Single/, /Generated 3D Reusable/, /Generated Audio Generated/,
     /Processed Media Pinned/, /Plan Timed beats/, /Script Narrative rows/, /Moodboard Pan, zoom/,
@@ -193,7 +194,7 @@ test("the add-composition flow exposes every maintained starter directly and res
 
   await dialog.getByRole("button", { name: /Generated Audio Generated/ }).click();
   await expect(dialog.getByText("audio artifact contract", { exact: false })).toBeVisible();
-  await expect(dialog.getByRole("spinbutton", { name: "Duration" })).toBeVisible();
+  await expect(dialog.getByRole("spinbutton", { name: "Duration" })).toHaveCount(0);
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
   await expect(trigger).toBeFocused();
@@ -204,6 +205,7 @@ test("the agent check reports warning state clearly and can capture the exact fr
   await expect(page.locator(".topbar").getByRole("button", { name: /Agent API/i })).toHaveCount(0);
   await page.locator(".guide-step-summary").filter({ hasText: "Check and capture through the Agent API" }).click();
   await page.getByRole("button", { name: "RESET TARGET" }).click();
+  await page.getByRole("button", { name: "CHECK", exact: true }).click();
   await expect(page.locator(".agent-check-summary strong")).toHaveText("READY WITH WARNINGS");
   await expect(page.locator(".agent-check-summary span")).toContainText("warning");
   await page.getByRole("button", { name: "SNAPSHOT CURRENT FRAME" }).click();

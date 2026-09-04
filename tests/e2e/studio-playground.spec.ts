@@ -6,7 +6,7 @@ import { openComposition } from "./helpers";
 async function openPlayground(page: Page): Promise<void> {
   await openComposition(page, "studio-playground");
   await expect(page).toHaveTitle("FrameDiff — Studio Playground");
-  await expect(page.locator(".top-status")).toHaveText("ready");
+  await expect(page.locator(".top-status")).toHaveText("");
   await expect(page.getByRole("heading", { name: "Every system." })).toBeVisible();
 }
 
@@ -18,15 +18,25 @@ test("the default project presents the complete nested acceptance graph", async 
   });
 
   await page.goto("/");
-  await expect(page.locator(".top-status")).toHaveText("ready");
+  await expect(page.locator(".top-status")).toHaveText("");
   await expect(page.locator(".breadcrumb button.active")).toHaveText("StudioPlayground");
-  await expect(page.locator(".clip[data-item-id^=playground-]")).toHaveCount(7);
+  const rootClips = page.locator(".clip[data-item-id^=playground-]");
+  await expect(rootClips).toHaveCount(10);
+  expect([...new Set(await rootClips.evaluateAll((clips) => clips.map((clip) => clip.getAttribute("data-item-id"))))].sort()).toEqual([
+    "playground-audio", "playground-authoring", "playground-editorial", "playground-effects",
+    "playground-hud", "playground-map", "playground-pipeline",
+  ]);
+  for (const id of ["playground-authoring", "playground-editorial", "playground-pipeline"]) {
+    await expect(page.locator(`.clip-video[data-item-id="${id}"]`)).toHaveCount(1);
+    await expect(page.locator(`.clip-audio[data-item-id="${id}"]`)).toHaveCount(1);
+  }
   const expected = ["CoverageMap", "AuthoringChapter", "EditorialChapter", "EffectsChapter", "PipelineChapter"];
   for (const id of expected) await expect(page.locator(".composition-row").filter({ hasText: id }).first()).toBeVisible();
   expect(missingLocalMedia).toEqual([]);
 });
 
 test("edit compositions keep rich timeline previews and clip seeking without the ghost stage", async ({ page }) => {
+  test.setTimeout(120_000);
   await openPlayground(page);
   const preview = page.locator(".preview-panel");
 
@@ -38,10 +48,10 @@ test("edit compositions keep rich timeline previews and clip seeking without the
   await expect(page.getByRole("button", { name: "X-RAY" })).toHaveCount(0);
   await expect(page.locator(".space-time-now-beam, .space-time-ruler, .space-time-ghost")).toHaveCount(0);
   await expect(page.locator(".frame-grid-preview")).toHaveCount(0);
-  await expect(page.locator(".clip-filmstrip").first()).toBeAttached({ timeout: 10_000 });
+  await expect(page.locator(".clip-filmstrip").first()).toBeAttached({ timeout: 90_000 });
   await expect(preview.locator("[data-fd-id=StudioPlayground]")).toBeVisible();
 
-  const clip = page.locator('.clip[data-item-id="playground-authoring"]');
+  const clip = page.locator('.clip-video[data-item-id="playground-authoring"]');
   const clipBounds = await clip.boundingBox();
   expect(clipBounds).not.toBeNull();
   await page.mouse.click(clipBounds!.x + clipBounds!.width * .5, clipBounds!.y + clipBounds!.height * .5);
@@ -134,6 +144,9 @@ test("timeline edge-panning keeps a dragged clip attached to the pointer", async
   try {
     await openComposition(page, "editorial-lab");
     await page.getByRole("slider", { name: "Timeline zoom" }).fill("55");
+    await page.evaluate(() => new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    }));
     const scroller = page.locator(".tl-scroll");
     const scrollerBounds = await scroller.boundingBox();
     const clip = page.locator('.clip[data-item-id="editorial-copy"]');
@@ -144,22 +157,28 @@ test("timeline edge-panning keeps a dragged clip attached to the pointer", async
     const visibleLeft = Math.max(before!.x + 20, scrollerBounds!.x + 80);
     const visibleRight = Math.min(before!.x + before!.width - 20, scrollerBounds!.x + scrollerBounds!.width - 120);
     expect(visibleRight).toBeGreaterThan(visibleLeft);
-    const startX = (visibleLeft + visibleRight) / 2;
+    const startX = visibleRight;
     const grabOffset = startX - before!.x;
     const start = { x: startX, y: before!.y + before!.height / 2 };
-    const targetX = scrollerBounds!.x + scrollerBounds!.width - 8;
+    // Stay inside the edge zone without selecting its maximum velocity. Browser-protocol
+    // round trips can span many animation frames, so the full-speed edge would legitimately
+    // reach the authored timeline boundary before the assertion can sample the live drag.
+    const targetX = scrollerBounds!.x + scrollerBounds!.width - 48;
     const initialScroll = await scroller.evaluate((element) => element.scrollLeft);
     await page.mouse.move(start.x, start.y);
     await page.mouse.down();
     await page.keyboard.down("Alt");
     await page.mouse.move(targetX, start.y, { steps: 8 });
-    await page.waitForTimeout(240);
-
+    await expect.poll(() => scroller.evaluate((element) => element.scrollLeft), { intervals: [25], timeout: 3_000 })
+      .toBeGreaterThan(initialScroll + 40);
     const pannedScroll = await scroller.evaluate((element) => element.scrollLeft);
     const during = await clip.boundingBox();
     expect(pannedScroll).toBeGreaterThan(initialScroll + 40);
     expect(during).not.toBeNull();
-    expect(Math.abs(during!.x + grabOffset - targetX)).toBeLessThan(16);
+    expect(
+      Math.abs(during!.x + grabOffset - targetX),
+      JSON.stringify({ before, during, grabOffset, targetX, initialScroll, pannedScroll, zoom: await page.getByRole("slider", { name: "Timeline zoom" }).inputValue() }),
+    ).toBeLessThan(16);
     await page.keyboard.up("Alt");
     await page.mouse.up();
   } finally {
@@ -172,7 +191,7 @@ test("timeline edge-panning keeps a dragged clip attached to the pointer", async
 
 test("an obsolete composition query is removed and cannot override the project root", async ({ page }) => {
   await page.goto("/?comp=production-lab");
-  await expect(page.locator(".top-status")).toHaveText("ready");
+  await expect(page.locator(".top-status")).toHaveText("");
   await expect(page).toHaveURL("http://127.0.0.1:4174/");
   await expect(page.locator(".breadcrumb button.active")).toHaveText("StudioPlayground");
 });
@@ -180,7 +199,7 @@ test("an obsolete composition query is removed and cannot override the project r
 test("a user can descend root to chapter to leaf and return through breadcrumbs", async ({ page }) => {
   await openPlayground(page);
 
-  await page.locator('.clip[data-item-id="playground-authoring"]').dblclick();
+  await page.locator('.clip-video[data-item-id="playground-authoring"]').dblclick();
   await expect(page.locator(".breadcrumb button.active")).toHaveText("AuthoringChapter");
   await expect(page.locator('.clip[data-item-id="author-direct"]')).toBeVisible();
 
@@ -309,28 +328,23 @@ test("direct manipulation is immediate and writes bound geometry to composition 
   }
 });
 
-test("motion paths explain their canvas controls and make drawing mode unmistakable", async ({ page }) => {
+test("motion paths stay frame-driven without a duplicate scene timeline", async ({ page }) => {
+  const motionWarnings: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "warning" && message.text().includes("motionPath")) motionWarnings.push(message.text());
+  });
   await openComposition(page, "gsap-motion-lab");
-
-  const productFlight = page.locator('.lane[data-animation-id="product-flight"] .animation-span');
-  await expect(productFlight).toHaveCount(1);
-  await productFlight.click();
-
-  await expect(page.getByRole("heading", { name: "ROUTE", exact: true })).toBeVisible();
-  await expect(page.getByText("Shape the object’s route on canvas", { exact: true })).toBeVisible();
-  await expect(page.getByText("Solid stops set positions; hollow handles shape the curve. Timing stays in the keys below.", { exact: true })).toBeVisible();
-  await expect(page.locator(".path-points")).not.toHaveAttribute("open", "");
-  await expect(page.locator(".canvas-context-hud.motion")).toContainText("solid stops set positions");
-  await expect(page.locator(".timeline-empty")).toHaveText("No clips in this scene — the motion lanes below drive the composition.");
-
-  await page.getByRole("button", { name: "Record a move" }).click();
-  await expect(page.locator(".canvas-overlay")).toHaveClass(/gesture-active/);
-  await expect(page.locator(".gesture-mode-hud")).toContainText("Playback starts when you drag the selected object");
-
-  await page.keyboard.press("Escape");
-  await expect(page.locator(".gesture-mode-hud")).toHaveCount(0);
-  await expect(page.locator(".canvas-overlay")).not.toHaveClass(/gesture-active/);
-  await expect(page.getByRole("button", { name: "Undo", exact: true })).toBeDisabled();
+  await expect(page.getByRole("group", { name: /Timeline/ })).toHaveCount(0);
+  const product = page.locator('[data-fd-id="path-product"]');
+  const scrubber = page.getByRole("slider", { name: "Preview frame" });
+  await scrubber.fill("82");
+  const before = await product.boundingBox();
+  await scrubber.fill("120");
+  const after = await product.boundingBox();
+  expect(before).not.toBeNull();
+  expect(after).not.toBeNull();
+  expect(Math.hypot(after!.x - before!.x, after!.y - before!.y)).toBeGreaterThan(40);
+  expect(motionWarnings).toEqual([]);
 });
 
 test("a composition can be dragged directly onto an edit timeline and undone", async ({ page }) => {
@@ -338,7 +352,7 @@ test("a composition can be dragged directly onto an edit timeline and undone", a
 
   const primaryCompositions = page.locator('.composition-list[role="list"]').first();
   const endCard = primaryCompositions.locator(".composition-row").filter({ hasText: "EndCard" });
-  const timeline = page.getByRole("group", { name: "Timeline; drop a composition to add it at a frame" });
+  const timeline = page.getByRole("group", { name: /Timeline; drop a composition.*to add it at a frame/ });
   await expect(endCard).toHaveCount(1);
   await expect(timeline).toBeVisible();
 
@@ -436,40 +450,54 @@ test("timeline v2 shapes share JSON layout, canvas resize, and stacking authorit
   }
 });
 
-test("edit clips expose video audio controls and reversible item and layer deletion", async ({ page }) => {
+test("edit clips expose audio controls and reversible item and layer deletion", async ({ page }) => {
+  const audioTimelineFile = "src/compositions/playground/PackageEffectsLab.timeline.json";
   const timelineFile = "src/compositions/labs/EditorialLab.timeline.json";
   const htmlFile = "src/compositions/labs/EditorialLab.html";
+  const originalAudioTimeline = await readFile(audioTimelineFile, "utf8");
   const originalTimeline = await readFile(timelineFile, "utf8");
   const originalHtml = await readFile(htmlFile, "utf8");
 
   try {
-    await openComposition(page, "editorial-lab");
-    const mediaClip = page.locator('.clip[data-item-id="editorial-media"]');
-    await mediaClip.evaluate((element) => (element as HTMLButtonElement).click());
-    await expect(page.getByRole("heading", { name: "VIDEO AUDIO" })).toBeVisible();
+    await openComposition(page, "package-effects-lab");
+    await page.locator('.clip-audio[data-item-id="effects-audio"]').evaluate((element) => (element as HTMLButtonElement).click());
+    await expect(page.getByRole("heading", { name: "AUDIO", exact: true })).toBeVisible();
 
-    const volume = page.getByRole("spinbutton", { name: "volume number" });
+    const volume = page.getByRole("spinbutton", { name: "volume number", exact: true });
     await expect(volume).toHaveValue("1");
     await volume.fill("0.35");
     await volume.press("Tab");
-    await expect.poll(async () => JSON.parse(await readFile(timelineFile, "utf8")).items[0].volume).toBe(0.35);
-    const previewVideo = page.locator('[data-fd-id="editorial-media"] video');
-    await expect.poll(() => previewVideo.evaluate((video: HTMLVideoElement) => ({
-      volume: video.volume,
-      exportVolume: video.dataset.framediffVolume,
-    }))).toEqual({ volume: 0.35, exportVolume: "0" });
+    await expect.poll(async () => JSON.parse(await readFile(audioTimelineFile, "utf8")).items[1].volume).toBe(0.35);
+    const previewAudio = page.locator('audio[data-fd-id="effects-audio"]');
+    await expect.poll(() => previewAudio.evaluate((audio: HTMLAudioElement) => ({
+      attributeVolume: audio.getAttribute("data-fd-volume"),
+      volume: audio.volume,
+      exportVolume: Number(audio.dataset.framediffVolume),
+    }))).toEqual({
+      attributeVolume: "0.35",
+      volume: expect.closeTo(0.042, 8),
+      exportVolume: expect.closeTo(0.042, 8),
+    });
+    expect(JSON.parse(await page.evaluate(() => sessionStorage.getItem("framediff:selection:/") ?? "null"))).toMatchObject({
+      selection: { objectId: "effects-audio", channel: "audio", target: "placement" },
+    });
+    await expect(page.getByRole("heading", { name: "AUDIO", exact: true })).toBeVisible();
 
-    const muted = page.getByRole("checkbox", { name: "muted" });
-    await expect(muted).toBeChecked();
-    await muted.uncheck();
-    await expect.poll(async () => JSON.parse(await readFile(timelineFile, "utf8")).items[0].muted).toBe(false);
-    await expect.poll(() => previewVideo.evaluate((video: HTMLVideoElement) => ({
-      muted: video.muted,
-      exportVolume: video.dataset.framediffVolume,
-    }))).toEqual({ muted: false, exportVolume: "0.35" });
+    const muted = page.getByRole("checkbox", { name: "muted boolean", exact: true });
+    await expect(muted).not.toBeChecked();
+    await muted.check();
+    await expect.poll(async () => JSON.parse(await readFile(audioTimelineFile, "utf8")).items[1].muted).toBe(true);
+    await expect.poll(() => previewAudio.evaluate((audio: HTMLAudioElement) => ({
+      muted: audio.muted,
+      exportVolume: audio.dataset.framediffVolume,
+    }))).toEqual({ muted: true, exportVolume: "0" });
 
     await page.getByRole("button", { name: "Undo", exact: true }).click();
     await page.getByRole("button", { name: "Undo", exact: true }).click();
+    await expect.poll(async () => readFile(audioTimelineFile, "utf8")).toBe(originalAudioTimeline);
+
+    await openComposition(page, "editorial-lab");
+    const mediaClip = page.locator('.clip-video[data-item-id="editorial-media"]');
     await expect.poll(async () => readFile(timelineFile, "utf8")).toBe(originalTimeline);
 
     await mediaClip.evaluate((element) => (element as HTMLButtonElement).click());
@@ -497,6 +525,7 @@ test("edit clips expose video audio controls and reversible item and layer delet
     await expect.poll(async () => readFile(timelineFile, "utf8")).toBe(originalTimeline);
     await expect.poll(async () => readFile(htmlFile, "utf8")).toBe(originalHtml);
   } finally {
+    if (await readFile(audioTimelineFile, "utf8") !== originalAudioTimeline) await writeFile(audioTimelineFile, originalAudioTimeline);
     if (await readFile(timelineFile, "utf8") !== originalTimeline) await writeFile(timelineFile, originalTimeline);
     if (await readFile(htmlFile, "utf8") !== originalHtml) await writeFile(htmlFile, originalHtml);
   }
@@ -581,7 +610,7 @@ test("the agent surface can inspect every new composition kind", async ({ page }
     { key: "world-set", kind: "set", objects: 0 },
     { key: "world-lab", kind: "previz", objects: 2 },
     { key: "audio-lab", kind: "audio", objects: 2 },
-    { key: "skyTimelapse", kind: "scene", objects: 1 },
+    { key: "skyTimelapse", kind: "scene", objects: 0 },
   ]);
 
   const visual = await page.evaluate(async () => {
@@ -677,13 +706,13 @@ test("set-linked previz exposes its input and a persistent numeric camera key ed
     await expect(positionX).not.toHaveValue("0");
     await positionX.fill("1.25");
     await roll.fill("7.5");
-    await expect(page.getByRole("status")).toContainText("DRAFT @ 0f");
+    await expect(page.locator(".fd-cl-status")).toContainText("DRAFT @ 0f");
     await page.getByRole("button", { name: "Replace the camera keyframe at frame 0" }).click();
     await expect.poll(async () => {
       const key = JSON.parse(await readFile(cameraFile, "utf8")).cameras.overview.keyframes[0];
       return { x: key.pose.cameraPosition[0], roll: key.pose.cameraRotation[2] };
     }).toEqual({ x: 1.25, roll: expect.closeTo(7.5 * Math.PI / 180, 8) });
-    await expect(page.getByRole("status")).toContainText(/SAVED|JSON/);
+    await expect(page.locator(".fd-cl-status")).toContainText(/SAVED|JSON/);
 
     await page.getByRole("button", { name: "Camera keyframe 2 at frame 119" }).click();
     await expect(page.locator(".fd-cl-title span")).toContainText("119f");

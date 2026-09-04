@@ -1,5 +1,8 @@
 import { gsap } from "gsap";
+import { MotionPathPlugin } from "gsap/MotionPathPlugin";
 import type { CompositionSetup } from "framediff";
+
+gsap.registerPlugin(MotionPathPlugin);
 
 interface ProjectGsapContext {
   gsap: typeof gsap;
