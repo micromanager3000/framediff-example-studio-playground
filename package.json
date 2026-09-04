@@ -17,9 +17,11 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@framediff/common-api": "file:vendor/framediff/packages/common-api",
     "@framediff/studio-model": "file:vendor/framediff/packages/studio-model",
     "@framediff/studio-ui": "file:vendor/framediff/packages/studio-ui",
     "framediff": "file:vendor/framediff/packages/framediff",
+    "gsap": "^3.15.0",
     "three": "^0.185.1"
   },
   "devDependencies": {

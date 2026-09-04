@@ -1,5 +1,5 @@
 import { defineComposition } from "framediff";
-import { defineGsapTimeline } from "framediff/gsap";
+import { defineGsapTimeline } from "../../lib/gsap-setup";
 import source from "./GsapMotionLab.html?raw";
 import document from "./GsapMotionLab.comp.json";
 

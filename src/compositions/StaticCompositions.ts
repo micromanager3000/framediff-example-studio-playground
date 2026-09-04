@@ -1,5 +1,5 @@
-import { defineGsapTimeline } from "framediff/gsap";
 import { defineComposition, defineTimelineDocument, type CompositionSetup, type StudioComposition } from "framediff";
+import { defineGsapTimeline } from "../lib/gsap-setup";
 import mainSource from "./HeroMain.html?raw";
 import lowerThirdSource from "./LowerThird.html?raw";
 import endCardSource from "./EndCard.html?raw";

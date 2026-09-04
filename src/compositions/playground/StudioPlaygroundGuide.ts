@@ -45,11 +45,11 @@ export const studioPlaygroundGuide: StudioGuideDescriptor = {
     {
       id: "gsap",
       phase: "Motion",
-      title: "Edit registered GSAP motion",
-      description: "Paused GSAP timelines remain source adapters over the absolute FrameDiff frame clock.",
-      try: "Move the title-enter key diamond, change its ease and jump backward across it.",
-      success: "The same frame resolves identically after non-linear scrubbing and refresh.",
-      target: { compositionKey: "gsap-motion-lab", frame: 20, selection: { kind: "animation", objectId: "title-enter" }, panel: "inspector" },
+      title: "Inspect project-owned GSAP motion",
+      description: "Paused project timelines remain deterministic runtimes over the absolute FrameDiff frame clock.",
+      try: "Edit the JSON-backed title copy and jump backward across its entrance.",
+      success: "The copy persists and the same frame resolves identically after non-linear scrubbing.",
+      target: { compositionKey: "gsap-motion-lab", frame: 20, selection: { kind: "element", objectId: "motion-title-lead" }, panel: "inspector" },
     },
     {
       id: "package-effects",
