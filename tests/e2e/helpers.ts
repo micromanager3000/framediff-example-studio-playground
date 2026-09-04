@@ -12,7 +12,10 @@ export async function openComposition(page: Page, compositionKey: string, url = 
   const rows = page.locator(selector);
   expect(await rows.count()).toBeGreaterThan(0);
   const row = rows.first();
-  await row.evaluate((element) => (element as HTMLButtonElement).click());
+  const className = await row.getAttribute("class");
+  if (!className?.split(/\s+/).includes("active")) {
+    await row.evaluate((element) => (element as HTMLButtonElement).click());
+  }
   await expect(row).toHaveClass(/active/);
   await expect(page).not.toHaveURL(/[?&]comp=/);
 }
